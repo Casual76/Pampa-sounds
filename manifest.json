@@ -14,8 +14,22 @@
       "manifestPath": "manifest.json",
       "ref": "main"
     },
-    "stable": null,
-    "beta": null,
+    "stable": {
+      "version": "1.0.0",
+      "releaseDate": "2026-10-13",
+      "changelog": "Prima versione: un fonometro per misurare il rumore della stanza.\n\n- Livello in dB(A), dB(C) o dB(Z), con costanti Fast e Slow: Leq, massimo, minimo, picco e L10/L50/L90, con i livelli di riferimento («come una conversazione»).\n- La misura continua a schermo spento, con il livello in tempo reale nella notifica e il tasto Ferma.\n- Spettro in tempo reale (curva o bande a terzi d'ottava), frequenza dominante con la sua nota e spettrogramma degli ultimi 20 secondi.\n- Storico: ogni misura diventa una sessione con grafico, statistiche, spettro medio, dose di esposizione NIOSH/OSHA ed export CSV.\n- Calibrazione: ritocco manuale o confronto con un fonometro vero.",
+      "releaseTag": "stable-pampa-sounds-v1.0.0",
+      "apkAsset": "pampa-sounds-1.0.0.apk",
+      "sizeBytes": 3127514
+    },
+    "beta": {
+      "version": "1.0.0",
+      "releaseDate": "2026-10-13",
+      "changelog": "Prima versione: un fonometro per misurare il rumore della stanza.\n\n- Livello in dB(A), dB(C) o dB(Z), con costanti Fast e Slow: Leq, massimo, minimo, picco e L10/L50/L90, con i livelli di riferimento («come una conversazione»).\n- La misura continua a schermo spento, con il livello in tempo reale nella notifica e il tasto Ferma.\n- Spettro in tempo reale (curva o bande a terzi d'ottava), frequenza dominante con la sua nota e spettrogramma degli ultimi 20 secondi.\n- Storico: ogni misura diventa una sessione con grafico, statistiche, spettro medio, dose di esposizione NIOSH/OSHA ed export CSV.\n- Calibrazione: ritocco manuale o confronto con un fonometro vero.",
+      "releaseTag": "stable-pampa-sounds-v1.0.0",
+      "apkAsset": "pampa-sounds-1.0.0.apk",
+      "sizeBytes": 3127514
+    },
     "history": []
   },
   "engine": {
