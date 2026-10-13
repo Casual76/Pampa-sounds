@@ -4,7 +4,7 @@
     "name": "Pampa Sounds",
     "description": "Un fonometro per la stanza: livello in dB(A/C/Z) con Fast e Slow, spettro e spettrogramma, storico delle misure anche a schermo spento, dose di esposizione NIOSH/OSHA ed export CSV.",
     "packageName": "dev.pampa.pampasounds",
-    "iconUrl": "",
+    "iconUrl": "https://raw.githubusercontent.com/Casual76/Pampa-sounds/main/store/icon.png",
     "category": "Strumenti",
     "developer": "Antigravity",
     "screenshots": [],
