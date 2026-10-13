@@ -15,22 +15,31 @@
       "ref": "main"
     },
     "stable": {
-      "version": "1.0.0",
+      "version": "1.0.1",
       "releaseDate": "2026-10-13",
-      "changelog": "Prima versione: un fonometro per misurare il rumore della stanza.\n\n- Livello in dB(A), dB(C) o dB(Z), con costanti Fast e Slow: Leq, massimo, minimo, picco e L10/L50/L90, con i livelli di riferimento («come una conversazione»).\n- La misura continua a schermo spento, con il livello in tempo reale nella notifica e il tasto Ferma.\n- Spettro in tempo reale (curva o bande a terzi d'ottava), frequenza dominante con la sua nota e spettrogramma degli ultimi 20 secondi.\n- Storico: ogni misura diventa una sessione con grafico, statistiche, spettro medio, dose di esposizione NIOSH/OSHA ed export CSV.\n- Calibrazione: ritocco manuale o confronto con un fonometro vero.",
-      "releaseTag": "stable-pampa-sounds-v1.0.0",
-      "apkAsset": "pampa-sounds-1.0.0.apk",
-      "sizeBytes": 3127514
+      "changelog": "Il vetro dell'app è aggiornato (Fluid Engine 2.12.1). I pannelli grandi sono più sfocati e piegano di più la luce ai bordi. I pulsanti si possono tenere premuti e trascinare senza che la pagina scorra, e interruttori e cursori non la fanno più scorrere mentre li muovi. Le notifiche dentro l'app si tirano giù per leggerle intere e si scartano verso l'alto. Il cursore delle impostazioni è nuovo: una pillola bianca che sotto il dito diventa una lente.",
+      "releaseTag": "stable-pampa-sounds-v1.0.1",
+      "apkAsset": "pampa-sounds-1.0.1.apk",
+      "sizeBytes": 3143910
     },
     "beta": {
-      "version": "1.0.0",
+      "version": "1.0.1",
       "releaseDate": "2026-10-13",
-      "changelog": "Prima versione: un fonometro per misurare il rumore della stanza.\n\n- Livello in dB(A), dB(C) o dB(Z), con costanti Fast e Slow: Leq, massimo, minimo, picco e L10/L50/L90, con i livelli di riferimento («come una conversazione»).\n- La misura continua a schermo spento, con il livello in tempo reale nella notifica e il tasto Ferma.\n- Spettro in tempo reale (curva o bande a terzi d'ottava), frequenza dominante con la sua nota e spettrogramma degli ultimi 20 secondi.\n- Storico: ogni misura diventa una sessione con grafico, statistiche, spettro medio, dose di esposizione NIOSH/OSHA ed export CSV.\n- Calibrazione: ritocco manuale o confronto con un fonometro vero.",
-      "releaseTag": "stable-pampa-sounds-v1.0.0",
-      "apkAsset": "pampa-sounds-1.0.0.apk",
-      "sizeBytes": 3127514
+      "changelog": "Il vetro dell'app è aggiornato (Fluid Engine 2.12.1). I pannelli grandi sono più sfocati e piegano di più la luce ai bordi. I pulsanti si possono tenere premuti e trascinare senza che la pagina scorra, e interruttori e cursori non la fanno più scorrere mentre li muovi. Le notifiche dentro l'app si tirano giù per leggerle intere e si scartano verso l'alto. Il cursore delle impostazioni è nuovo: una pillola bianca che sotto il dito diventa una lente.",
+      "releaseTag": "stable-pampa-sounds-v1.0.1",
+      "apkAsset": "pampa-sounds-1.0.1.apk",
+      "sizeBytes": 3143910
     },
-    "history": []
+    "history": [
+      {
+        "version": "1.0.0",
+        "releaseDate": "2026-10-13",
+        "changelog": "Prima versione: un fonometro per misurare il rumore della stanza.\n\n- Livello in dB(A), dB(C) o dB(Z), con costanti Fast e Slow: Leq, massimo, minimo, picco e L10/L50/L90, con i livelli di riferimento («come una conversazione»).\n- La misura continua a schermo spento, con il livello in tempo reale nella notifica e il tasto Ferma.\n- Spettro in tempo reale (curva o bande a terzi d'ottava), frequenza dominante con la sua nota e spettrogramma degli ultimi 20 secondi.\n- Storico: ogni misura diventa una sessione con grafico, statistiche, spettro medio, dose di esposizione NIOSH/OSHA ed export CSV.\n- Calibrazione: ritocco manuale o confronto con un fonometro vero.",
+        "releaseTag": "stable-pampa-sounds-v1.0.0",
+        "apkAsset": "pampa-sounds-1.0.0.apk",
+        "sizeBytes": 3127514
+      }
+    ]
   },
   "engine": {
     "schema": 1,
