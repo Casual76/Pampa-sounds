@@ -1,0 +1,272 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 1,
+    "identityHash": "36a7456325768d94eeb6b43e1e6db6ee",
+    "entities": [
+      {
+        "tableName": "sessions",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER NOT NULL, `startedAt` INTEGER NOT NULL, `endedAt` INTEGER, `name` TEXT, `source` TEXT NOT NULL, `sampleRate` INTEGER NOT NULL, `offsetDb` REAL NOT NULL, `durationSeconds` REAL NOT NULL, `peakDbfs` REAL, `doseNiosh` REAL, `doseOsha` REAL, `bandsDbfs` TEXT, PRIMARY KEY(`id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "startedAt",
+            "columnName": "startedAt",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "endedAt",
+            "columnName": "endedAt",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "name",
+            "columnName": "name",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "source",
+            "columnName": "source",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "sampleRate",
+            "columnName": "sampleRate",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "offsetDb",
+            "columnName": "offsetDb",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "durationSeconds",
+            "columnName": "durationSeconds",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "peakDbfs",
+            "columnName": "peakDbfs",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "doseNiosh",
+            "columnName": "doseNiosh",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "doseOsha",
+            "columnName": "doseOsha",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "bandsDbfs",
+            "columnName": "bandsDbfs",
+            "affinity": "TEXT"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        }
+      },
+      {
+        "tableName": "session_stats",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`sessionId` INTEGER NOT NULL, `weighting` INTEGER NOT NULL, `leq` REAL, `maxFast` REAL, `minFast` REAL, `maxSlow` REAL, `minSlow` REAL, `l10` REAL, `l50` REAL, `l90` REAL, PRIMARY KEY(`sessionId`, `weighting`), FOREIGN KEY(`sessionId`) REFERENCES `sessions`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "sessionId",
+            "columnName": "sessionId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "weighting",
+            "columnName": "weighting",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "leq",
+            "columnName": "leq",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "maxFast",
+            "columnName": "maxFast",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "minFast",
+            "columnName": "minFast",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "maxSlow",
+            "columnName": "maxSlow",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "minSlow",
+            "columnName": "minSlow",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "l10",
+            "columnName": "l10",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "l50",
+            "columnName": "l50",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "l90",
+            "columnName": "l90",
+            "affinity": "REAL"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "sessionId",
+            "weighting"
+          ]
+        },
+        "foreignKeys": [
+          {
+            "table": "sessions",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "sessionId"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "samples",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`sessionId` INTEGER NOT NULL, `second` INTEGER NOT NULL, `eqA` REAL NOT NULL, `eqC` REAL NOT NULL, `eqZ` REAL NOT NULL, `maxA` REAL, `maxC` REAL, `maxZ` REAL, `minA` REAL, `minC` REAL, `minZ` REAL, `peak` REAL NOT NULL, PRIMARY KEY(`sessionId`, `second`), FOREIGN KEY(`sessionId`) REFERENCES `sessions`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "sessionId",
+            "columnName": "sessionId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "second",
+            "columnName": "second",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "eqA",
+            "columnName": "eqA",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "eqC",
+            "columnName": "eqC",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "eqZ",
+            "columnName": "eqZ",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "maxA",
+            "columnName": "maxA",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "maxC",
+            "columnName": "maxC",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "maxZ",
+            "columnName": "maxZ",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "minA",
+            "columnName": "minA",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "minC",
+            "columnName": "minC",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "minZ",
+            "columnName": "minZ",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "peak",
+            "columnName": "peak",
+            "affinity": "REAL",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "sessionId",
+            "second"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_samples_sessionId",
+            "unique": false,
+            "columnNames": [
+              "sessionId"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_samples_sessionId` ON `${TABLE_NAME}` (`sessionId`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "sessions",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "sessionId"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      }
+    ],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '36a7456325768d94eeb6b43e1e6db6ee')"
+    ]
+  }
+}

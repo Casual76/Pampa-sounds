@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- L'icona piccola della notifica: le stesse barre, in bianco pieno come vuole la status bar. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+  <path
+      android:pathData="M5,10.5 L5,13.5 M9,8 L9,16 M13,5 L13,19 M17,9 L17,15 M21,7.5 L21,16.5"
+      android:strokeWidth="2.2"
+      android:strokeColor="#FFFFFFFF"
+      android:strokeLineCap="round" />
+</vector>

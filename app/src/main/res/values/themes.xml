@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+  <!-- Compose disegna tutto; il tema di piattaforma deve solo togliersi di mezzo e lasciare la
+       finestra da bordo a bordo, cosi' le barre hanno qualcosa sopra cui stare. Il colore di fondo
+       evita il lampo bianco all'apertura in tema scuro. -->
+  <style name="Theme.PampaSounds" parent="android:Theme.Material.Light.NoActionBar">
+    <item name="android:windowBackground">@color/window_background</item>
+    <item name="android:statusBarColor">@android:color/transparent</item>
+    <item name="android:navigationBarColor">@android:color/transparent</item>
+    <item name="android:windowLightStatusBar">true</item>
+    <item name="android:windowLightNavigationBar" tools:targetApi="27">true</item>
+    <item name="android:enforceStatusBarContrast" tools:targetApi="29">false</item>
+    <item name="android:enforceNavigationBarContrast" tools:targetApi="29">false</item>
+  </style>
+</resources>

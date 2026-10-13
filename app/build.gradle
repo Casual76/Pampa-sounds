@@ -1,0 +1,143 @@
+plugins {
+  id 'com.android.application'
+  id 'org.jetbrains.kotlin.android'
+  id 'org.jetbrains.kotlin.plugin.compose'
+  id 'com.google.devtools.ksp'
+  id 'androidx.room'
+}
+
+apply from: "${rootDir}/engine/versions.gradle"
+apply from: "${rootDir}/versions-app.gradle"
+
+// La chiave di firma vive fuori dal repo. Due strade, nell'ordine:
+//   1. local.properties (git-ignorato):
+//        pampa.storeFile=C:/VibeCoded Projects/pampa.jks
+//        pampa.storePassword=...
+//        pampa.keyAlias=pampa
+//        pampa.keyPassword=...
+//   2. variabili d'ambiente PAMPA_RELEASE_STORE_FILE / _STORE_PASSWORD / _KEY_ALIAS / _KEY_PASSWORD.
+// Senza chiave si compila lo stesso con la firma di debug, e lo si dice: quella build non e'
+// pubblicabile sul Pampa Store.
+def localProps = new Properties()
+def localPropsFile = rootProject.file('local.properties')
+if (localPropsFile.exists()) {
+  localPropsFile.withInputStream { localProps.load(it) }
+}
+def signingValue = { String prop, String env ->
+  def v = localProps.getProperty(prop)
+  if (v == null || v.trim().isEmpty()) v = System.getenv(env)
+  return (v == null || v.trim().isEmpty()) ? null : v.trim()
+}
+def keyStorePath = signingValue('pampa.storeFile', 'PAMPA_RELEASE_STORE_FILE')
+def keyStorePassword = signingValue('pampa.storePassword', 'PAMPA_RELEASE_STORE_PASSWORD')
+def keyAliasValue = signingValue('pampa.keyAlias', 'PAMPA_RELEASE_KEY_ALIAS') ?: 'pampa'
+def keyPasswordValue = signingValue('pampa.keyPassword', 'PAMPA_RELEASE_KEY_PASSWORD') ?: keyStorePassword
+def hasReleaseKey = keyStorePath != null && keyStorePassword != null && rootProject.file(keyStorePath).exists()
+
+// Dove l'app pubblica: lo stesso manifest.json che il Pampa Store legge, alla radice del repo.
+// L'aggiornamento in-app legge da qui; una sola fonte, mai due versioni.
+def manifestUrl = 'https://raw.githubusercontent.com/Casual76/Pampa-sounds/main/manifest.json'
+
+android {
+  namespace 'dev.pampa.pampasounds'
+  compileSdk engine.compileSdk
+
+  defaultConfig {
+    applicationId 'dev.pampa.pampasounds'
+    minSdk engine.minSdk
+    targetSdk engine.compileSdk
+    versionCode 1
+    // Letterale: il publisher dello store legge questa riga con una regex che capisce solo stringhe.
+    versionName '1.0.0'
+    buildConfigField 'String', 'MANIFEST_URL', "\"${manifestUrl}\""
+    // Il canale e' compilato dentro l'APK: cambiarlo vuol dire una build nuova, non basta il manifest.
+    buildConfigField 'String', 'DEFAULT_UPDATE_CHANNEL', '"stable"'
+  }
+
+  signingConfigs {
+    if (hasReleaseKey) {
+      release {
+        storeFile rootProject.file(keyStorePath)
+        storePassword keyStorePassword
+        keyAlias keyAliasValue
+        keyPassword keyPasswordValue
+        // La v1 va accesa a mano: AGP la toglie con minSdk >= 24, e il publisher dello store
+        // convalida proprio la presenza della firma JAR (META-INF/*.RSA) prima di caricare.
+        enableV1Signing true
+        enableV2Signing true
+        enableV3Signing true
+      }
+    }
+  }
+
+  buildTypes {
+    debug {
+      // Un suffisso, cosi' una build di lavoro convive sul telefono con quella dello store.
+      applicationIdSuffix '.debug'
+      versionNameSuffix '-debug'
+    }
+    release {
+      // R8 alleggerisce ma NON rinomina (-dontobfuscate in proguard-rules.pro): una traccia di crash
+      // letta su un telefono senza computer attaccato serve solo se ha i nomi veri.
+      minifyEnabled true
+      shrinkResources true
+      proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+      if (hasReleaseKey) {
+        signingConfig signingConfigs.release
+      } else {
+        signingConfig signingConfigs.debug
+        println 'Pampa Sounds: nessuna chiave pampa: release firmata DEBUG, non pubblicabile.'
+      }
+    }
+  }
+
+  // Solo l'italiano e l'inglese: le risorse di altre lingue portate dalle librerie non entrano.
+  androidResources {
+    localeFilters += ['it', 'en']
+  }
+
+  buildFeatures {
+    compose true
+    buildConfig true
+  }
+
+  compileOptions {
+    sourceCompatibility engine.javaVersion
+    targetCompatibility engine.javaVersion
+  }
+
+  kotlinOptions {
+    jvmTarget = engine.jvmTarget
+  }
+}
+
+room {
+  // Gli schemi si versionano: sono la fotografia di ogni versione del database su cui
+  // si appoggeranno le migrazioni.
+  schemaDirectory("$projectDir/schemas")
+}
+
+ksp {
+  arg('room.generateKotlin', 'true')
+}
+
+dependencies {
+  implementation project(':dsp')
+
+  implementation project(':engine-ui')        // design system (porta con se' Compose e engine-foundation)
+  implementation project(':engine-storage')   // tema e aptica su DataStore
+  implementation project(':engine-update')    // aggiornamento in-app dal Pampa Store
+
+  implementation "androidx.core:core-ktx:${engine.coreKtx}"
+  implementation "androidx.activity:activity-compose:${engine.activityCompose}"
+  implementation "androidx.navigation:navigation-compose:${engine.navigation}"
+  implementation "androidx.lifecycle:lifecycle-runtime-compose:${engine.lifecycle}"
+  implementation "androidx.datastore:datastore-preferences:${engine.datastore}"
+  implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:${engine.coroutines}"
+
+  implementation "androidx.room:room-runtime:${appVersions.room}"
+  implementation "androidx.room:room-ktx:${appVersions.room}"
+  ksp "androidx.room:room-compiler:${appVersions.room}"
+
+  testImplementation "junit:junit:${engine.junit}"
+}

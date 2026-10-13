@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <!-- Solo per la finestra prima che Compose disegni, e per l'icona: nell'app i colori vengono
+       tutti dal tema. -->
+  <color name="window_background">#FFF6F8F9</color>
+  <color name="ic_launcher_background">#FF0B5560</color>
+</resources>

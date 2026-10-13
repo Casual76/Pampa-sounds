@@ -1,0 +1,29 @@
+# Gradle
+.gradle/
+build/
+**/build/
+.kotlin/
+
+# Local config (SDK, chiavi di firma)
+local.properties
+keystore.properties
+*.jks
+*.keystore
+
+# IDE
+.idea/
+*.iml
+.vscode/
+.DS_Store
+
+# Android
+captures/
+*.apk
+*.aab
+output-metadata.json
+
+# JVM crash logs
+hs_err_pid*.log
+replay_pid*.log
+
+# Room: gli schemi esportati (app/schemas) si versionano apposta.

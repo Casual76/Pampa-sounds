@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <string name="app_name">Pampa Sounds</string>
+  <string name="meter_channel_name">Misura in corso</string>
+  <string name="meter_channel_description">Il livello sonoro in tempo reale mentre l\'app misura in background.</string>
+  <string name="meter_notification_stop">Ferma</string>
+</resources>

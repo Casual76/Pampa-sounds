@@ -1,0 +1,7 @@
+// Le versioni che servono solo a quest'app. Quelle condivise (Compose, lifecycle, DataStore,
+// coroutine, JUnit...) arrivano dalla mappa `engine` di engine/versions.gradle: un'unica fonte,
+// cosi' l'app non puo' tirare una versione di Compose diversa da quella con cui l'engine compila.
+ext.appVersions = [
+  // DEVE combaciare con il plugin 'androidx.room' dichiarato nel build.gradle di radice.
+  room: '2.8.4',
+]

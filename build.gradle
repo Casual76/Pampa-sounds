@@ -1,0 +1,28 @@
+// I moduli dell'engine applicano questi plugin senza versione: il root li dichiara per tutti.
+plugins {
+  id 'com.android.application' version '8.13.2' apply false
+  id 'com.android.library' version '8.13.2' apply false
+  id 'org.jetbrains.kotlin.android' version '2.2.20' apply false
+  id 'org.jetbrains.kotlin.plugin.compose' version '2.2.20' apply false
+  id 'org.jetbrains.kotlin.jvm' version '2.2.20' apply false
+  // La parte dopo il trattino e' la versione di KSP, quella prima DEVE combaciare con Kotlin.
+  id 'com.google.devtools.ksp' version '2.2.20-2.0.4' apply false
+  // Esporta gli schemi JSON del database. DEVE avere la stessa versione di appVersions.room.
+  id 'androidx.room' version '2.8.4' apply false
+}
+
+// Google Drive sincronizza "C:\VibeCoded Projects", e ogni file che Gradle scrive in build/ viene
+// preso in carico per il caricamento: finche' Drive lo tiene aperto Gradle non lo puo' cancellare,
+// e una ricompilazione muore con "Unable to delete directory". Le cartelle di build stanno quindi
+// FUORI dalla cartella sincronizzata, una per modulo (lo stesso trucco di Pampa Notes). Si puo'
+// scegliere dove con -Ppampa.buildRoot=...; senza LOCALAPPDATA (Linux, CI) resta il build/ di sempre.
+def pampaBuildRoot = providers.gradleProperty('pampa.buildRoot').orNull
+if (pampaBuildRoot == null && System.getenv('LOCALAPPDATA')) {
+  pampaBuildRoot = new File(System.getenv('LOCALAPPDATA'), 'PampaSounds/build').path
+}
+if (pampaBuildRoot != null) {
+  allprojects {
+    def slot = project.path == ':' ? 'root' : project.name
+    layout.buildDirectory.set(file("${pampaBuildRoot}/${slot}"))
+  }
+}

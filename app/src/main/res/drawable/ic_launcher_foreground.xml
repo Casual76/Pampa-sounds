@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Cinque barre di un livello sonoro, dentro la zona sicura dell'icona adattiva (66 dp al centro). -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+  <path
+      android:pathData="M34,47 L34,61 M44,41 L44,67 M54,35 L54,73 M64,43 L64,65 M74,39 L74,69"
+      android:strokeWidth="6.5"
+      android:strokeColor="#FFFFFFFF"
+      android:strokeLineCap="round" />
+</vector>
