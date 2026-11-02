@@ -9,6 +9,7 @@ import dev.pampa.pampasounds.data.CsvExporter
 import dev.pampa.pampasounds.data.SessionRepository
 import dev.pampa.pampasounds.data.SoundsDatabase
 import dev.pampa.pampasounds.settings.MeterSettings
+import dev.pampa.pampasounds.update.UpdateController
 import dev.pampa.pampasounds.update.soundsUpdater
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -19,7 +20,7 @@ class PampaSoundsApp : Application() {
 }
 
 /**
- * Gli oggetti che vivono quanto il processo. Niente DI: sono sei, e si leggono tutti da qui.
+ * Gli oggetti che vivono quanto il processo. Niente DI: sono sette, e si leggono tutti da qui.
  *
  * Il motore di misura sta qui e non nel servizio perche' la UI lo legge anche quando il servizio non
  * c'e' (i numeri dell'ultima misura restano a schermo), e il servizio lo comanda soltanto.
@@ -37,6 +38,12 @@ class AppContainer(context: Context) {
   val csvExporter by lazy { CsvExporter(app, sessions) }
   val meterEngine by lazy { MeterEngine(app, sessions, meterSettings, appScope) }
   val updater: AppUpdater by lazy { soundsUpdater(app) }
+
+  /** L'aggiornamento in-app, con il suo stato: sopravvive al cambio di scheda, e un download non si ferma. */
+  val updateController by lazy {
+    // Il manifest conosce solo la release: la build di debug si confronta con la versione senza suffisso.
+    UpdateController(updater, appScope, currentVersion = BuildConfig.VERSION_NAME.removeSuffix("-debug"))
+  }
 }
 
 val Context.container: AppContainer get() = (applicationContext as PampaSoundsApp).container

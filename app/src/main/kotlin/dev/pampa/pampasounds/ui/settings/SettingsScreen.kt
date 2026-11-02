@@ -15,32 +15,31 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import dev.antigravity.fluidengine.foundation.AppUpdateInstallState
-import dev.antigravity.fluidengine.foundation.AvailableAppUpdate
 import dev.antigravity.fluidengine.foundation.EngineSettings
 import dev.antigravity.fluidengine.foundation.ThemeMode
-import dev.antigravity.fluidengine.ui.fluid.FluidAlert
-import dev.antigravity.fluidengine.ui.fluid.FluidAlertAction
 import dev.antigravity.fluidengine.ui.fluid.FluidAmbient
 import dev.antigravity.fluidengine.ui.fluid.FluidButton
 import dev.antigravity.fluidengine.ui.fluid.FluidButtonSize
 import dev.antigravity.fluidengine.ui.fluid.FluidButtonStyle
 import dev.antigravity.fluidengine.ui.fluid.FluidHeroMotif
 import dev.antigravity.fluidengine.ui.fluid.FluidHeroTone
+import dev.antigravity.fluidengine.ui.fluid.FluidPressGrip
+import dev.antigravity.fluidengine.ui.fluid.FluidPromptAlert
 import dev.antigravity.fluidengine.ui.fluid.FluidRowValue
 import dev.antigravity.fluidengine.ui.fluid.FluidScreen
 import dev.antigravity.fluidengine.ui.fluid.FluidSectionFootnote
 import dev.antigravity.fluidengine.ui.fluid.FluidSectionHeader
 import dev.antigravity.fluidengine.ui.fluid.FluidSegmentedControl
 import dev.antigravity.fluidengine.ui.fluid.FluidSlider
-import dev.antigravity.fluidengine.ui.fluid.FluidSwitch
-import dev.antigravity.fluidengine.ui.fluid.FluidTextField
 import dev.antigravity.fluidengine.ui.fluid.FluidTextStyles
+import dev.antigravity.fluidengine.ui.fluid.FluidToggleRow
 import dev.antigravity.fluidengine.ui.fluid.fluidLicensesSection
+import dev.antigravity.fluidengine.ui.fluid.fluidUpdateSection
 import dev.antigravity.fluidengine.ui.theme.FluidCard
 import dev.antigravity.fluidengine.ui.theme.FluidListDivider
 import dev.antigravity.fluidengine.ui.theme.FluidListGroup
@@ -78,6 +77,7 @@ fun SettingsScreen(container: AppContainer, bottomInset: Dp) {
   var draftTrim by remember { mutableStateOf<Float?>(null) }
   val trim = draftTrim?.toDouble() ?: prefs.trimDb
   val source = meter.source
+  val trimLabel = "${if (trim > 0) "+" else ""}${formatDb(trim)} dB"
 
   FluidScreen(
     title = "Impostazioni",
@@ -90,7 +90,7 @@ fun SettingsScreen(container: AppContainer, bottomInset: Dp) {
       FluidCard(glass = true) {
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
           Text(
-            text = "${if (trim > 0) "+" else ""}${formatDb(trim)} dB",
+            text = trimLabel,
             style = FluidTextStyles.numeric,
             color = MaterialTheme.colorScheme.onSurface,
           )
@@ -104,6 +104,12 @@ fun SettingsScreen(container: AppContainer, bottomInset: Dp) {
           value = trim.toFloat(),
           onValueChange = { draftTrim = (it * 10f).roundToInt() / 10f },
           valueRange = -20f..20f,
+          // «Nessun ritocco» e' una tacca (e un colpo aptico): si ritrova senza guardare. Piccola, 0,4 dB, perche'
+          // i ritocchi fini attorno allo zero restano della pista e dei tasti.
+          snapValues = listOf(0f),
+          snapThreshold = 0.01f,
+          contentDescription = "Ritocco di calibrazione",
+          stateDescription = if (trim == 0.0) "nessun ritocco" else trimLabel,
           onValueChangeFinished = {
             val value = draftTrim ?: return@FluidSlider
             scope.launch {
@@ -120,6 +126,8 @@ fun SettingsScreen(container: AppContainer, bottomInset: Dp) {
               style = FluidButtonStyle.Tinted,
               size = FluidButtonSize.Small,
               modifier = Modifier.weight(1f),
+              // Quattro tasti affiancati sotto lo slider, in una pagina che scorre: la pagina non deve restare senza dito.
+              grip = FluidPressGrip.YieldsToScroll,
             )
           }
         }
@@ -189,12 +197,11 @@ fun SettingsScreen(container: AppContainer, bottomInset: Dp) {
     }
     item(key = "meter-switches") {
       FluidListGroup(glass = true) {
-        FluidListRow(
+        FluidToggleRow(
           title = "Schermo acceso durante la misura",
           subtitle = "Con lo schermo spento la misura continua comunque",
-          onClick = { scope.launch { container.meterSettings.setKeepScreenOn(!prefs.keepScreenOn) } },
-          disclosure = false,
-          badge = { FluidSwitch(checked = prefs.keepScreenOn, onCheckedChange = null) },
+          checked = prefs.keepScreenOn,
+          onCheckedChange = { scope.launch { container.meterSettings.setKeepScreenOn(it) } },
         )
       }
     }
@@ -214,18 +221,31 @@ fun SettingsScreen(container: AppContainer, bottomInset: Dp) {
     }
     item(key = "appearance-switches") {
       FluidListGroup(glass = true) {
-        FluidListRow(
+        FluidToggleRow(
           title = "Vibrazioni",
           subtitle = "Un tocco sotto il dito all'avvio e allo stop",
-          onClick = { scope.launch { container.engineSettings.setHapticsEnabled(!engineSettings.hapticsEnabled) } },
-          disclosure = false,
-          badge = { FluidSwitch(checked = engineSettings.hapticsEnabled, onCheckedChange = null) },
+          checked = engineSettings.hapticsEnabled,
+          onCheckedChange = { scope.launch { container.engineSettings.setHapticsEnabled(it) } },
         )
       }
     }
 
+    val update = container.updateController
+    fluidUpdateSection(
+      state = update.state,
+      onCheck = update::check,
+      onInstall = update::install,
+      currentVersion = BuildConfig.VERSION_NAME,
+      lastCheckedAtMillis = update.lastCheckedAtMillis,
+      glass = true,
+    )
+
     item(key = "about-header") { FluidSectionHeader(title = "Informazioni") }
-    item(key = "about") { AboutGroup(container) }
+    item(key = "about") {
+      FluidListGroup(glass = true) {
+        FluidListRow(title = "Pacchetto", subtitle = LocalContext.current.packageName)
+      }
+    }
     fluidLicensesSection()
   }
 
@@ -260,84 +280,17 @@ private fun CalibrationDialog(
   onConfirm: (measured: Double, reference: Double) -> Unit,
 ) {
   val frozen = remember { currentReading }
-  var text by remember { mutableStateOf("") }
-  val reference = text.replace(',', '.').toDoubleOrNull()
-  val valid = frozen != null && !frozen.isNaN() && reference != null && reference in 20.0..140.0
-  FluidAlert(
-    onDismissRequest = onDismiss,
+  FluidPromptAlert(
     title = "Calibra con un fonometro",
     message = "Metti il telefono accanto al fonometro, con la stessa pesatura ($unit). L'app legge adesso ${formatDb(frozen)} $unit.",
-    actions = listOf(
-      FluidAlertAction("Annulla", onClick = onDismiss),
-      FluidAlertAction(
-        "Calibra",
-        onClick = { if (valid) onConfirm(frozen!!, reference!!) },
-        emphasis = FluidAlertAction.Emphasis.Preferred,
-        enabled = valid,
-      ),
-    ),
-  ) {
-    FluidTextField(
-      value = text,
-      onValueChange = { text = it },
-      placeholder = "Valore del fonometro, es. 54,3",
-      keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-    )
-  }
-}
-
-/**
- * Versione e aggiornamento in-app dal Pampa Store: un tocco controlla, il tocco dopo installa.
- */
-@Composable
-private fun AboutGroup(container: AppContainer) {
-  val context = LocalContext.current
-  val scope = rememberCoroutineScope()
-  var status by remember { mutableStateOf("Tocca per controllare") }
-  var available by remember { mutableStateOf<AvailableAppUpdate?>(null) }
-  var busy by remember { mutableStateOf(false) }
-
-  FluidListGroup(glass = true) {
-    FluidListRow(title = "Versione", subtitle = "Pampa Sounds ${BuildConfig.VERSION_NAME}")
-    FluidListDivider()
-    FluidListRow(
-      title = "Aggiornamenti",
-      subtitle = status,
-      onClick = {
-        if (busy) return@FluidListRow
-        val update = available
-        scope.launch {
-          busy = true
-          if (update == null) {
-            status = "Controllo…"
-            container.updater.check(currentVersionName = BuildConfig.VERSION_NAME.removeSuffix("-debug"))
-              .onSuccess { found ->
-                if (found == null) {
-                  status = "Sei all'ultima versione"
-                } else {
-                  available = found
-                  status = "Disponibile la ${found.version}: tocca per installare"
-                }
-              }
-              .onFailure { status = "Controllo non riuscito: sei offline?" }
-          } else {
-            container.updater.install(update).collect { state ->
-              status = when (state) {
-                is AppUpdateInstallState.Downloading -> "Scarico… ${(state.progress * 100).toInt()} %"
-                is AppUpdateInstallState.Verifying -> state.message
-                is AppUpdateInstallState.Installing -> state.message
-                is AppUpdateInstallState.AwaitingUserAction -> state.message
-                is AppUpdateInstallState.Installed -> "Installata: riapri l'app"
-                is AppUpdateInstallState.Error -> "Errore: ${state.message}"
-              }
-            }
-            available = null
-          }
-          busy = false
-        }
-      },
-    )
-    FluidListDivider()
-    FluidListRow(title = "Pacchetto", subtitle = context.packageName)
-  }
+    onDismissRequest = onDismiss,
+    onConfirm = { text ->
+      val reference = parseReference(text)
+      if (frozen != null && reference != null) onConfirm(frozen, reference)
+    },
+    placeholder = "Valore del fonometro, es. 54,3",
+    confirmLabel = "Calibra",
+    validate = { text -> calibrationValidation(text, frozen) },
+    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal, imeAction = ImeAction.Done),
+  )
 }
