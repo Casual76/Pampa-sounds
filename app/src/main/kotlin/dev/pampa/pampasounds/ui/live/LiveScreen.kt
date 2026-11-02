@@ -141,6 +141,8 @@ fun LiveScreen(
             style = FluidButtonStyle.Destructive,
             size = FluidButtonSize.Large,
             fillWidth = true,
+            // Fermare ha il suo colpo (`Stop`, da `MeterController`): il tasto non ne suona altri tre sopra.
+            haptic = null,
             leading = { Icon(Icons.Rounded.Stop, contentDescription = null) },
           )
         } else {
@@ -149,6 +151,8 @@ fun LiveScreen(
             onClick = meter.start,
             size = FluidButtonSize.Large,
             fillWidth = true,
+            // Avviare ha il suo colpo (`ListenStart`, da `MeterController`): il tasto non ne suona altri tre sopra.
+            haptic = null,
             leading = { Icon(Icons.Rounded.Mic, contentDescription = null) },
           )
         }
@@ -268,12 +272,15 @@ private fun androidx.compose.foundation.lazy.LazyListScope.noticeItem(state: Met
   }
   if (message != null) {
     item(key = "notice") {
-      Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        FluidInlineMessage(title = message.first, message = message.second, tone = message.third)
-        if (problem == MicPermissionProblem.Blocked) {
-          FluidButton(text = "Apri le impostazioni", onClick = meter.openAppSettings, style = FluidButtonStyle.Tinted, fillWidth = true)
-        }
-      }
+      // Con il permesso negato per sempre l'avviso e' anche il tasto che porta alle impostazioni di sistema.
+      val blocked = problem == MicPermissionProblem.Blocked
+      FluidInlineMessage(
+        title = message.first,
+        message = message.second,
+        tone = message.third,
+        onClick = if (blocked) meter.openAppSettings else null,
+        action = if (blocked) "Apri le impostazioni" else null,
+      )
     }
   }
 }

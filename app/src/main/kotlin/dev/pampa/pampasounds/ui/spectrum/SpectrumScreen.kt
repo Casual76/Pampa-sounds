@@ -24,7 +24,7 @@ import dev.antigravity.fluidengine.ui.fluid.FluidScreen
 import dev.antigravity.fluidengine.ui.fluid.FluidSectionFootnote
 import dev.antigravity.fluidengine.ui.fluid.FluidSectionHeader
 import dev.antigravity.fluidengine.ui.fluid.FluidSegmentedControl
-import dev.antigravity.fluidengine.ui.fluid.FluidSwitch
+import dev.antigravity.fluidengine.ui.fluid.FluidToggleRow
 import dev.antigravity.fluidengine.ui.theme.FluidCard
 import dev.antigravity.fluidengine.ui.theme.FluidEmptyState
 import dev.antigravity.fluidengine.ui.theme.FluidListDivider
@@ -124,7 +124,8 @@ fun SpectrumScreen(container: AppContainer, meter: MeterController, bottomInset:
             title = if (state.isMeasuring) "Un attimo…" else "Nessuno spettro",
             detail = if (state.isMeasuring) "Il primo spettro arriva dopo un quinto di secondo." else "Avvia una misura per vedere le frequenze della stanza in tempo reale.",
           )
-          if (!state.isMeasuring) FluidButton(text = "Avvia la misura", onClick = meter.start, fillWidth = true)
+          // L'avvio ha il suo colpo (`ListenStart`, da `MeterController`): il tasto non ne suona altri tre.
+          if (!state.isMeasuring) FluidButton(text = "Avvia la misura", onClick = meter.start, fillWidth = true, haptic = null)
         }
       }
       return@FluidScreen
@@ -181,12 +182,11 @@ fun SpectrumScreen(container: AppContainer, meter: MeterController, bottomInset:
           },
         )
         FluidListDivider()
-        FluidListRow(
+        FluidToggleRow(
           title = "Trattieni i picchi",
           subtitle = "Una linea sottile segna i massimi recenti",
-          onClick = { scope.launch { container.meterSettings.setPeakHold(!prefs.peakHold) } },
-          disclosure = false,
-          badge = { FluidSwitch(checked = prefs.peakHold, onCheckedChange = null) },
+          checked = prefs.peakHold,
+          onCheckedChange = { scope.launch { container.meterSettings.setPeakHold(it) } },
         )
       }
     }
