@@ -90,6 +90,9 @@ fun AppRoot(container: AppContainer) {
   // Prima che navigation abbia una rotta e' la prima scheda; il dettaglio di una sessione non ne ha.
   val tab = if (route == null) SoundsTab.Live else SoundsTab.fromRoute(route)
   val onMain = tab != null
+  // L'ultima scheda davanti: mentre il dettaglio si apre e la barra se ne va, la barra resta com'era e non salta a Misura.
+  val lastTab = remember { LastTab() }
+  if (tab != null) lastTab.value = tab
 
   val bottomInset = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
   val chromeController = rememberFluidChromeController()
@@ -176,7 +179,7 @@ fun AppRoot(container: AppContainer) {
         ) {
           FluidFloatingTabBar(
             items = SoundsTab.entries.map { it.item },
-            selectedRoute = (tab ?: SoundsTab.Live).route,
+            selectedRoute = lastTab.value.route,
             onSelect = { item -> SoundsTab.fromRoute(item.route)?.let(openTab) },
             onReselect = { scrollToTop.request() },
             scrollConnection = tabBarScroll,
@@ -194,6 +197,11 @@ fun AppRoot(container: AppContainer) {
       )
     }
   }
+}
+
+/** Un valore ricordato fuori dallo stato di Compose: si scrive durante la composizione senza riscriverla. */
+private class LastTab {
+  var value: SoundsTab = SoundsTab.Live
 }
 
 /** Una scheda: la lista lascia in fondo lo spazio della barra, che la copre. Il dettaglio non ne lascia. */
