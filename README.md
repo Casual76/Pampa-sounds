@@ -1,7 +1,7 @@
 # Pampa Sounds
 
 Un fonometro Android per misurare il rumore di una stanza, costruito sul
-[Fluid Engine](https://github.com/Casual76/fluid-engine) (3.0.0-rc.2).
+[Fluid Engine](https://github.com/Casual76/fluid-engine) (3.0.0).
 
 ## Cosa fa
 
