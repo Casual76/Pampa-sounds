@@ -1,7 +1,7 @@
 # Pampa Sounds
 
 Un fonometro Android per misurare il rumore di una stanza, costruito sul
-[Fluid Engine](https://github.com/Casual76/fluid-engine) (2.11.0).
+[Fluid Engine](https://github.com/Casual76/fluid-engine) (3.0.0-rc.2).
 
 ## Cosa fa
 
@@ -44,3 +44,19 @@ powershell -ExecutionPolicy Bypass -File engine\tools\engine-doctor.ps1 -AppRoot
 `manifest.json` alla radice è quello che leggono il Pampa Store e l'aggiornamento in-app
 (`BuildConfig.MANIFEST_URL` → `Casual76/Pampa-sounds`). La prima release la scrive il publisher
 (skill `pampa-store-publish-direct`); il repository GitHub va creato prima.
+
+## Licenza
+
+Pampa Sounds è software libero: si distribuisce sotto la **GNU General Public License, versione 3**
+(testo completo in [`LICENSE`](LICENSE)). Chi riceve l'APK ha diritto ai sorgenti, che sono questo
+repository: <https://github.com/Casual76/Pampa-sounds>. Si possono leggere, modificare e ridistribuire
+alle condizioni della GPL-3.0, con la stessa licenza.
+
+**Perché GPL-3.0.** Dalla 3.0 il Fluid Engine contiene codice di
+[LibrePods](https://github.com/librepods-org/librepods) (GPL-3.0): il comportamento dei pulsanti e delle
+pagine non è più riscritto, è portato. Un'app che distribuisce l'engine è un'opera derivata, e va
+distribuita con la stessa licenza. È la regola di tutte le app Pampa che usano l'engine.
+
+Le opere di altri che l'APK porta con sé (il vetro di Kyant, Apache-2.0; i caratteri Inter, SIL OFL 1.1;
+LibrePods) sono elencate nella pagina **Impostazioni › Informazioni** dell'app, con gli avvisi che le
+loro licenze chiedono; i testi sono in [`engine/LICENSES/`](engine/LICENSES).
