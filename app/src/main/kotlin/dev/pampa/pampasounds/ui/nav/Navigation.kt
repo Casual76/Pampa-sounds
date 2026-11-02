@@ -1,7 +1,6 @@
 package dev.pampa.pampasounds.ui.nav
 
 import androidx.navigation.NavHostController
-import androidx.navigation.NavGraph.Companion.findStartDestination
 
 /**
  * Le rotte dell'app: quattro schede, pari fra loro, e il dettaglio di una sessione che si apre sopra.
@@ -24,17 +23,14 @@ object Routes {
  * Passa a un'altra scheda.
  *
  * Una scheda non sta sopra l'altra: la pila resta fatta di una scheda sola, e il back da qualunque
- * scheda esce dall'app (com'era prima, con le schede dentro un `AnimatedContent`). Ogni scheda
- * conserva dove la si era lasciata (la posizione della lista, la fascia scelta): e' lo stato che
- * `navigation` salva quando la scheda esce e rimette quando rientra.
+ * scheda esce dall'app (com'era prima, con le schede dentro un `AnimatedContent`). Come prima, una
+ * scheda che si lascia non ricorda dove la si era lasciata: tornandoci riparte dall'inizio.
  */
 fun NavHostController.selectTab(route: String) {
   navigate(route) {
-    popUpTo(graph.findStartDestination().id) {
-      inclusive = true
-      saveState = true
-    }
+    // Via tutta la pila, grafo compreso: la scheda di partenza non e' sempre quella davanti, e un popUpTo su di
+    // lei, una volta uscita dalla pila, non trova niente da togliere e le schede si accumulerebbero.
+    popUpTo(graph.id) { inclusive = true }
     launchSingleTop = true
-    restoreState = true
   }
 }
