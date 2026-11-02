@@ -24,19 +24,19 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import dev.antigravity.fluidengine.ui.fluid.FluidAlert
-import dev.antigravity.fluidengine.ui.fluid.FluidAlertAction
 import dev.antigravity.fluidengine.ui.fluid.FluidBarAction
 import dev.antigravity.fluidengine.ui.fluid.FluidContextAction
 import dev.antigravity.fluidengine.ui.fluid.FluidLoadingBlock
+import dev.antigravity.fluidengine.ui.fluid.FluidMenuOpensOn
 import dev.antigravity.fluidengine.ui.fluid.FluidNotification
 import dev.antigravity.fluidengine.ui.fluid.FluidNotificationTone
+import dev.antigravity.fluidengine.ui.fluid.FluidPromptAlert
+import dev.antigravity.fluidengine.ui.fluid.FluidPromptValidation
 import dev.antigravity.fluidengine.ui.fluid.FluidRowValue
 import dev.antigravity.fluidengine.ui.fluid.FluidScreen
 import dev.antigravity.fluidengine.ui.fluid.FluidSectionFootnote
 import dev.antigravity.fluidengine.ui.fluid.FluidSectionHeader
 import dev.antigravity.fluidengine.ui.fluid.FluidSegmentedControl
-import dev.antigravity.fluidengine.ui.fluid.FluidTextField
 import dev.antigravity.fluidengine.ui.fluid.LocalFluidNotificationHostState
 import dev.antigravity.fluidengine.ui.theme.FluidCard
 import dev.antigravity.fluidengine.ui.theme.FluidListDivider
@@ -59,6 +59,7 @@ import dev.pampa.pampasounds.ui.charts.BandChart
 import dev.pampa.pampasounds.ui.charts.LevelLineChart
 import dev.pampa.pampasounds.ui.charts.TimeLabel
 import dev.pampa.pampasounds.ui.charts.spectrumTop
+import dev.pampa.pampasounds.ui.common.DeleteSessionAlert
 import dev.pampa.pampasounds.ui.format.formatClock
 import dev.pampa.pampasounds.ui.format.formatDb
 import dev.pampa.pampasounds.ui.format.formatDuration
@@ -128,6 +129,8 @@ fun SessionScreen(
         contentDescription = "Altro",
         onClick = {},
         enabled = current != null,
+        // I tre puntini non fanno altro che aprire il menu: con un tocco, e non solo tenendo premuto.
+        opensOn = FluidMenuOpensOn.Tap,
         actions = {
           listOf(
             FluidContextAction("Rinomina", Icons.Rounded.Edit) { renaming = true },
@@ -222,45 +225,31 @@ fun SessionScreen(
   }
 
   if (renaming && current != null) {
-    var name by remember { mutableStateOf(current.session.name.orEmpty()) }
-    FluidAlert(
-      onDismissRequest = { renaming = false },
+    FluidPromptAlert(
       title = "Rinomina",
       message = "Un nome aiuta a ritrovarla: «Camera, notte», «Ufficio con il condizionatore».",
-      actions = listOf(
-        FluidAlertAction("Annulla", onClick = { renaming = false }),
-        FluidAlertAction(
-          "Salva",
-          onClick = {
-            renaming = false
-            scope.launch { container.sessions.rename(sessionId, name) }
-          },
-          emphasis = FluidAlertAction.Emphasis.Preferred,
-        ),
-      ),
-    ) {
-      FluidTextField(value = name, onValueChange = { name = it }, placeholder = formatSessionStart(current.session.startedAt))
-    }
+      onDismissRequest = { renaming = false },
+      onConfirm = { name ->
+        renaming = false
+        scope.launch { container.sessions.rename(sessionId, name) }
+      },
+      initialValue = current.session.name.orEmpty(),
+      placeholder = formatSessionStart(current.session.startedAt),
+      // Un nome vuoto e' ammesso: toglie il nome, e la sessione torna a chiamarsi con la sua data.
+      validate = { FluidPromptValidation.Valid },
+    )
   }
 
   if (confirmDelete) {
-    FluidAlert(
-      onDismissRequest = { confirmDelete = false },
-      title = "Eliminare la sessione?",
+    DeleteSessionAlert(
       message = "Il grafico e i dati di questa misura spariscono per sempre.",
-      actions = listOf(
-        FluidAlertAction("Annulla", onClick = { confirmDelete = false }),
-        FluidAlertAction(
-          "Elimina",
-          onClick = {
-            confirmDelete = false
-            onBack()
-            // Lo scope dell'app, non quello della schermata: la schermata sta per andarsene.
-            container.appScope.launch { container.sessions.delete(sessionId) }
-          },
-          emphasis = FluidAlertAction.Emphasis.Destructive,
-        ),
-      ),
+      onDismiss = { confirmDelete = false },
+      onConfirm = {
+        confirmDelete = false
+        onBack()
+        // Lo scope dell'app, non quello della schermata: la schermata sta per andarsene.
+        container.appScope.launch { container.sessions.delete(sessionId) }
+      },
     )
   }
 }

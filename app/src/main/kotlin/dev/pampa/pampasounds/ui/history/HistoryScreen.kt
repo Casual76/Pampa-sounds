@@ -18,8 +18,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.Dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import dev.antigravity.fluidengine.ui.fluid.FluidAlert
-import dev.antigravity.fluidengine.ui.fluid.FluidAlertAction
 import dev.antigravity.fluidengine.ui.fluid.FluidAmbient
 import dev.antigravity.fluidengine.ui.fluid.FluidButton
 import dev.antigravity.fluidengine.ui.fluid.FluidContextAction
@@ -28,10 +26,9 @@ import dev.antigravity.fluidengine.ui.fluid.FluidHeroTone
 import dev.antigravity.fluidengine.ui.fluid.FluidScreen
 import dev.antigravity.fluidengine.ui.fluid.FluidSectionHeader
 import dev.antigravity.fluidengine.ui.fluid.FluidSegmentedControl
+import dev.antigravity.fluidengine.ui.fluid.fluidGlassGroups
 import dev.antigravity.fluidengine.ui.theme.FluidCard
 import dev.antigravity.fluidengine.ui.theme.FluidEmptyState
-import dev.antigravity.fluidengine.ui.theme.FluidListDivider
-import dev.antigravity.fluidengine.ui.theme.FluidListGroup
 import dev.antigravity.fluidengine.ui.theme.FluidListRow
 import dev.antigravity.fluidengine.ui.theme.FluidTone
 import dev.pampa.pampasounds.AppContainer
@@ -40,6 +37,7 @@ import dev.pampa.pampasounds.settings.MeterPreferences
 import dev.pampa.pampasounds.ui.MeterController
 import dev.pampa.pampasounds.ui.charts.LevelLineChart
 import dev.pampa.pampasounds.ui.charts.TimeLabel
+import dev.pampa.pampasounds.ui.common.DeleteSessionAlert
 import dev.pampa.pampasounds.ui.format.formatDb
 import dev.pampa.pampasounds.ui.format.formatDurationWords
 import dev.pampa.pampasounds.ui.format.formatHourMinute
@@ -137,36 +135,33 @@ fun HistoryScreen(
             title = "Nessuna sessione",
             detail = "Ogni misura che fermi finisce qui, con il grafico, le statistiche e il CSV da esportare.",
           )
-          if (!state.isMeasuring) FluidButton(text = "Avvia la misura", onClick = meter.start, fillWidth = true)
+          // L'avvio ha il suo colpo (`ListenStart`, da `MeterController`): il tasto non ne suona altri tre.
+          if (!state.isMeasuring) FluidButton(text = "Avvia la misura", onClick = meter.start, fillWidth = true, haptic = null)
         }
       }
       else -> {
-        // Un gruppo per giorno: gruppi corti, e un pannello di vetro ciascuno invece di uno lunghissimo.
+        // Un gruppo per giorno. `fluidGlassGroups` tiene il vetro sul pannello e non sulla riga, e spezza
+        // un giorno lungo in pannelli da otto righe senza che il taglio si veda.
         val byDay = list.groupBy { dayOf(it.session.startedAt) }
         byDay.forEach { (day, items) ->
           item(key = "day-$day") { FluidSectionHeader(title = dayTitle(day)) }
-          item(key = "group-$day") {
-            FluidListGroup(glass = true) {
-              items.forEachIndexed { index, item ->
-                if (index > 0) FluidListDivider()
-                val offset = item.session.offsetDb
-                val leq = item.leqA?.let { dbfsToSpl(it, offset) }?.takeUnless { it.isNaN() }
-                val max = item.maxA?.let { dbfsToSpl(it, offset) }?.takeUnless { it.isNaN() }
-                FluidListRow(
-                  title = item.session.name ?: formatSessionStart(item.session.startedAt),
-                  subtitle = "${formatDurationWords(item.session.durationSeconds)} · Leq ${formatDb(leq)} dB(A)",
-                  meta = "Massimo ${formatDb(max)} dB(A)" + (item.session.doseNiosh?.takeIf { it >= 1 }?.let { " · dose ${it.toInt()} %" } ?: ""),
-                  tone = leq?.let { palette.toneFor(it) } ?: FluidTone.Neutral,
-                  leading = { Icon(Icons.Rounded.GraphicEq, contentDescription = null) },
-                  onClick = { onOpenSession(item.session.id) },
-                  contextActions = {
-                    listOf(
-                      FluidContextAction("Elimina", Icons.Rounded.Delete, destructive = true) { pendingDelete = item },
-                    )
-                  },
+          fluidGlassGroups(items, key = "group-$day") { entry ->
+            val offset = entry.session.offsetDb
+            val leq = entry.leqA?.let { dbfsToSpl(it, offset) }?.takeUnless { it.isNaN() }
+            val max = entry.maxA?.let { dbfsToSpl(it, offset) }?.takeUnless { it.isNaN() }
+            FluidListRow(
+              title = entry.session.name ?: formatSessionStart(entry.session.startedAt),
+              subtitle = "${formatDurationWords(entry.session.durationSeconds)} · Leq ${formatDb(leq)} dB(A)",
+              meta = "Massimo ${formatDb(max)} dB(A)" + (entry.session.doseNiosh?.takeIf { it >= 1 }?.let { " · dose ${it.toInt()} %" } ?: ""),
+              tone = leq?.let { palette.toneFor(it) } ?: FluidTone.Neutral,
+              leading = { Icon(Icons.Rounded.GraphicEq, contentDescription = null) },
+              onClick = { onOpenSession(entry.session.id) },
+              contextActions = {
+                listOf(
+                  FluidContextAction("Elimina", Icons.Rounded.Delete, destructive = true) { pendingDelete = entry },
                 )
-              }
-            }
+              },
+            )
           }
         }
       }
@@ -174,21 +169,13 @@ fun HistoryScreen(
   }
 
   pendingDelete?.let { item ->
-    FluidAlert(
-      onDismissRequest = { pendingDelete = null },
-      title = "Eliminare la sessione?",
+    DeleteSessionAlert(
       message = "${item.session.name ?: formatSessionStart(item.session.startedAt)}: il grafico e i dati spariscono per sempre.",
-      actions = listOf(
-        FluidAlertAction("Annulla", onClick = { pendingDelete = null }),
-        FluidAlertAction(
-          "Elimina",
-          onClick = {
-            pendingDelete = null
-            scope.launch { container.sessions.delete(item.session.id) }
-          },
-          emphasis = FluidAlertAction.Emphasis.Destructive,
-        ),
-      ),
+      onDismiss = { pendingDelete = null },
+      onConfirm = {
+        pendingDelete = null
+        scope.launch { container.sessions.delete(item.session.id) }
+      },
     )
   }
 }
